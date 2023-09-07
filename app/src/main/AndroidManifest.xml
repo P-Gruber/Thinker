@@ -12,6 +12,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Thinker"
         tools:targetApi="31">
+        <service
+            android:name=".infrastructure.services.AndroidTaskManagerService"
+            android:enabled="true"
+            android:exported="true">
+
+        </service>
+
         <activity
             android:name=".infrastructure.MainActivity"
             android:exported="true"
