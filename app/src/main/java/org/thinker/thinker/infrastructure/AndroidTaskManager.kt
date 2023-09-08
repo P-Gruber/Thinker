@@ -1,15 +1,13 @@
-package org.thinker.thinker.infrastructure.services
+package org.thinker.thinker.infrastructure
 
-import android.app.Service
-import android.content.Intent
 import org.thinker.thinker.application.TaskManager
 import org.thinker.thinker.domain.Task
 import org.thinker.thinker.domain.osevents.Event
+import org.thinker.thinker.domain.osevents.SystemEvents
 
-class AndroidTaskManagerService : Service(), TaskManager
+class AndroidTaskManager(androidEvents: SystemEvents) : TaskManager
 {
-
-    override fun onBind(intent: Intent) = null
+    private val tasks = mutableListOf<Task>()
 
     override fun addTask(task: Task)
     {

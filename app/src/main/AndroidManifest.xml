@@ -13,7 +13,7 @@
         android:theme="@style/Theme.Thinker"
         tools:targetApi="31">
         <service
-            android:name=".infrastructure.services.AndroidTaskManagerService"
+            android:name=".infrastructure.services.MainService"
             android:enabled="true"
             android:exported="true">
 
