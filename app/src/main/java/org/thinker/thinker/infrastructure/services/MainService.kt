@@ -43,7 +43,7 @@ class MainService : Service()
     {
         val serviceChannel = NotificationChannel(
             CHANNEL_ID,
-            "Tasks Channel",
+            "Tasks Notifications", // TODO: Localize it
             NotificationManager.IMPORTANCE_DEFAULT
         )
 
