@@ -19,7 +19,7 @@ class AITask(
     override fun execute()
     {
         // TODO: "Not yet implemented"
-        shell.interpretInput("test", {}, {}, {})
+        shell.interpretInput("toast \"Test number one\"", {}, {}, {})
     }
 
     override fun getTriggeringEvents(): Set<Event>

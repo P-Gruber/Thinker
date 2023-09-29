@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity()
                 AndroidDataRetriever(),
                 setOf(Event.Screen.TurnedOn()),
                 setOf(),
-                setOf()
+                setOf("toast")
             )
             mainService.addTask(aiTask)
         }
