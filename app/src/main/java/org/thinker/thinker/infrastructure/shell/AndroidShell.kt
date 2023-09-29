@@ -35,7 +35,9 @@ class AndroidShell(private val context: Context) : Shell
 
     private fun parseCommand(input: String): Pair<String, List<String>>
     {
-        val parts = input.split(" ").filterNot { it.isBlank() }
+        val parts = input.split(" (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)".toRegex()).map {
+            it.replace("\"", "")
+        }.filter { it.isNotBlank() }
         val programName = parts[0]
         val args = parts.drop(1)
         return programName to args

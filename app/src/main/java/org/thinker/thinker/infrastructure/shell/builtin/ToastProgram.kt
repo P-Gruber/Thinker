@@ -1,7 +1,6 @@
 package org.thinker.thinker.infrastructure.shell.builtin
 
 import android.content.Context
-import android.view.Gravity
 import android.widget.Toast
 import com.beust.jcommander.IParameterValidator
 import com.beust.jcommander.IStringConverter
@@ -10,8 +9,6 @@ import com.beust.jcommander.Parameter
 import com.beust.jcommander.ParameterException
 import org.thinker.thinker.domain.shell.Program
 import org.thinker.thinker.domain.shell.Shell
-import org.thinker.thinker.infrastructure.shell.builtin.jcommander.converters.GravityConverter
-import org.thinker.thinker.infrastructure.shell.builtin.jcommander.validators.GravityValidator
 
 class ToastProgram(private val context: Context) : Program
 {
@@ -43,10 +40,7 @@ class ToastProgram(private val context: Context) : Program
                     Shell.ExitCodes.SUCCESS
                 }
 
-                text != null && xOffset != null && yOffset != null ->
-                    showToast(text!!, duration, gravity, xOffset!!, yOffset!!)
-
-                text != null -> showToast(text!!, duration, gravity, 0, 0)
+                text != null -> showToast(text!!, duration)
 
                 else -> Shell.ExitCodes.GENERAL_ERROR
             }
@@ -63,14 +57,9 @@ class ToastProgram(private val context: Context) : Program
         stdout(stringBuilder.toString())
     }
 
-    private fun showToast(
-        text: String, duration: Int, gravity: Int, xOffset: Int, yOffset: Int
-    ): Int
+    private fun showToast(text: String, duration: Int): Int
     {
-        val toast = Toast.makeText(context, text, duration)
-        toast.setGravity(gravity, xOffset, yOffset)
-        toast.show()
-
+        Toast.makeText(context, text, duration).show()
         return Shell.ExitCodes.SUCCESS
     }
 
@@ -90,37 +79,9 @@ class ToastProgram(private val context: Context) : Program
             converter = ToastDurationConverter::class,
         )
         var duration: Int = Toast.LENGTH_LONG
-
-        @Parameter(
-            names = ["-g", "--gravity"],
-            description = "Gravity for the toast position.\n" +
-                    "Valid options are: \n" +
-                    "   \"top\"\n" +
-                    "   \"bottom\"\n" +
-                    "   \"left\"\n" +
-                    "   \"right\"\n" +
-                    "   \"center\"\n" +
-                    "   \"top-left\"\n" +
-                    "   \"top-center\"\n" +
-                    "   \"top-right\"\n" +
-                    "   \"bottom-left\"\n" +
-                    "   \"bottom-right\"\n" +
-                    "   \"bottom-center\"\n" +
-                    "   \"center-left\"\n" +
-                    "   \"center-right\"",
-            validateWith = [GravityValidator::class],
-            converter = GravityConverter::class
-        )
-        var gravity: Int = Gravity.BOTTOM or Gravity.CENTER
-
-        @Parameter(names = ["-x"], description = "X-offset for toast position")
-        var xOffset: Int? = null
-
-        @Parameter(names = ["-y"], description = "Y-offset for toast position")
-        var yOffset: Int? = null
     }
 
-    private class ToastDurationValidator : IParameterValidator
+    class ToastDurationValidator : IParameterValidator
     {
         override fun validate(name: String?, value: String?)
         {
@@ -138,13 +99,13 @@ class ToastProgram(private val context: Context) : Program
 
     }
 
-    private class ToastDurationConverter : IStringConverter<Int>
+    class ToastDurationConverter : IStringConverter<Int>
     {
         override fun convert(value: String?): Int
         {
             return when (value!!.lowercase())
             {
-                "SHORT" -> Toast.LENGTH_SHORT
+                "short" -> Toast.LENGTH_SHORT
                 else -> Toast.LENGTH_LONG
             }
         }
