@@ -13,9 +13,11 @@ abstract class Task(
     private val dataRetriever: DataRetriever
 )
 {
-    protected val triggers = listOf<Event>()
-    protected val dataSourceNames = listOf<DataSourceName>()
-    protected val actions = listOf<String>() // List<ProgramName>
+    protected abstract val triggers: Set<Event>
+    protected abstract val dataSourceNames: Set<DataSourceName>
+    protected abstract val actions: Set<String> // Set<ProgramName>
 
     abstract fun execute()
+
+    abstract fun getTriggeringEvents(): Set<Event>
 }

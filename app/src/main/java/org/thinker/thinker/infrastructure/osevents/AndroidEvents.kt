@@ -1,40 +1,56 @@
 package org.thinker.thinker.infrastructure.osevents
 
+import android.content.Context
 import org.thinker.thinker.domain.osevents.Event
+import org.thinker.thinker.domain.osevents.SystemEvent
 import org.thinker.thinker.domain.osevents.SystemEventObserver
 import org.thinker.thinker.domain.osevents.SystemEvents
+import org.thinker.thinker.domain.utils.Either
+import org.thinker.thinker.infrastructure.AndroidTaskManager
+import org.thinker.thinker.infrastructure.osevents.events.ScreenEvent
 
-class AndroidEvents: SystemEvents
+class AndroidEvents(private val context: Context, private val observer: AndroidTaskManager) :
+    SystemEvents, SystemEventObserver
 {
-    private var observer: SystemEventObserver? = null
+    private val observedAndroidEvents = mutableMapOf<Event, SystemEvent?>()
 
-    private val observedEvents = mutableSetOf<Event>()
-
-    private val activeAndroidEvents = mutableSetOf<SystemEvents>()
-
-    override fun subscribeTo(event: Event)
+    override fun subscribeTo(event: Event): Either<Exception, Boolean>
     {
-        TODO("Not yet implemented")
+        val systemEvent = observedAndroidEvents.computeIfAbsent(event) {
+            when (event)
+            {
+                is Event.Screen -> ScreenEvent(context, this)
+            }
+        }
+        return systemEvent?.subscribeTo(event) ?: Either.Left(Exception())
     }
 
-    override fun unsubscribeFrom(event: Event)
+
+    override fun unsubscribeFrom(event: Event): Either<Exception, Boolean>
     {
-        TODO("Not yet implemented")
+        val systemEvent = observedAndroidEvents[event]
+        val response = systemEvent?.unsubscribeFrom(event)
+        response?.fold({}) { wasLastOne ->
+            if (wasLastOne) observedAndroidEvents.remove(event)
+        }
+        return response ?: Either.Left(Exception())
     }
 
-    override fun subscribe(systemEventObserver: SystemEventObserver)
+    override fun notifyObserver(event: Event)
     {
-        TODO("Not yet implemented")
+        observer.update(event)
     }
 
-    override fun unsubscribe(systemEventObserver: SystemEventObserver)
+    override fun onDestroy()
     {
-        TODO("Not yet implemented")
+        observedAndroidEvents.values.forEach {
+            it?.onDestroy()
+        }
     }
 
-    override fun notifyObservers(event: Event)
+    override fun update(event: Event)
     {
-        TODO("Not yet implemented")
+        notifyObserver(event)
     }
 
 }

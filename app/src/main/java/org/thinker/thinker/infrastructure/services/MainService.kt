@@ -6,29 +6,58 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Binder
+import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import org.thinker.thinker.R
 import org.thinker.thinker.application.TaskManager
+import org.thinker.thinker.domain.Task
 import org.thinker.thinker.infrastructure.AndroidTaskManager
-import org.thinker.thinker.infrastructure.kextensions.ContextExtensions.getAppName
-import org.thinker.thinker.infrastructure.osevents.AndroidEvents
 
 class MainService : Service()
 {
-    private val systemEvents = AndroidEvents()
-    private val androidTaskManager: TaskManager = AndroidTaskManager(systemEvents)
-    override fun onBind(intent: Intent) = null
+    private lateinit var taskManager: TaskManager
+    private val binder = LocalBinder()
+
+    inner class LocalBinder : Binder()
+    {
+        fun getService(): MainService = this@MainService
+    }
+
+    override fun onBind(intent: Intent?): IBinder = binder
 
     override fun onCreate()
     {
         super.onCreate()
         createNotificationChannel()
+        taskManager = AndroidTaskManager(applicationContext)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
     {
         startForeground(NOTIFICATION_ID, createNotification())
-        return START_NOT_STICKY
+        return START_STICKY
+    }
+
+    override fun onDestroy()
+    {
+        super.onDestroy()
+        taskManager.onDestroy()
+    }
+
+    fun addTask(task: Task)
+    {
+        taskManager.addTask(task)
+    }
+
+    fun removeTask(task: Task)
+    {
+        taskManager.removeTask(task)
+    }
+
+    fun updateTask(task: Task)
+    {
+        taskManager.updateTask(task)
     }
 
     private fun createNotification(): Notification

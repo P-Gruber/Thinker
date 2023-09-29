@@ -1,31 +1,54 @@
 package org.thinker.thinker.infrastructure
 
+import android.content.Context
 import org.thinker.thinker.application.TaskManager
 import org.thinker.thinker.domain.Task
 import org.thinker.thinker.domain.osevents.Event
-import org.thinker.thinker.domain.osevents.SystemEvents
+import org.thinker.thinker.infrastructure.osevents.AndroidEvents
 
-class AndroidTaskManager(androidEvents: SystemEvents) : TaskManager
+class AndroidTaskManager(context: Context) : TaskManager
 {
+    private val androidEvents = AndroidEvents(context, this)
+
     private val tasks = mutableListOf<Task>()
 
     override fun addTask(task: Task)
     {
-        TODO("Not yet implemented")
+        tasks.add(task)
+        task.getTriggeringEvents().forEach {
+            androidEvents.subscribeTo(it)
+        }
     }
 
     override fun removeTask(task: Task)
     {
-        TODO("Not yet implemented")
+        tasks.remove(task)
+        task.getTriggeringEvents().forEach {
+            androidEvents.unsubscribeFrom(it)
+        }
     }
 
     override fun updateTask(task: Task)
     {
-        TODO("Not yet implemented")
+        removeTask(task)
+        addTask(task)
+    }
+
+    override fun onDestroy()
+    {
+        androidEvents.onDestroy()
     }
 
     override fun update(event: Event)
     {
-        TODO("Not yet implemented")
+        tasks.forEach { task ->
+            task.getTriggeringEvents().forEach triggers@{ taskEvent ->
+                if (taskEvent == event)
+                {
+                    task.execute()
+                    return@triggers
+                }
+            }
+        }
     }
 }

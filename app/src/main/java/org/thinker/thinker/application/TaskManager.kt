@@ -10,4 +10,6 @@ interface TaskManager: SystemEventObserver
     fun removeTask(task: Task)
 
     fun updateTask(task: Task)
+
+    fun onDestroy()
 }
