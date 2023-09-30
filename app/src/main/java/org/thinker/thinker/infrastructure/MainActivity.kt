@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import org.thinker.thinker.domain.AITask
+import org.thinker.thinker.domain.nlp.NLPModel
 import org.thinker.thinker.domain.osevents.Event
 import org.thinker.thinker.infrastructure.dataretrieving.AndroidDataRetriever
 import org.thinker.thinker.infrastructure.restrictions.AndroidRestrictionChecker
@@ -41,7 +42,16 @@ class MainActivity : ComponentActivity()
                 AndroidShell(applicationContext),
                 AndroidRestrictionChecker(),
                 AndroidDataRetriever(),
+                object : NLPModel
+                {
+                    override fun submitPrompt(prompt: String): String
+                    {
+                        return "toast -t \"Faked response\""
+                    }
+                },
+                "prompt",
                 setOf(Event.Screen.TurnedOn()),
+                setOf(),
                 setOf(),
                 setOf("toast")
             )
