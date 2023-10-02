@@ -29,7 +29,13 @@ class AITask(
 
     override fun execute()
     {
-        if (canNotExecute()) return
+        val canNotExecute = canNotExecute()
+        if (canNotExecute.isLeft)
+        {
+            notifyRestrictionProblem()
+            return
+        }
+        if (canNotExecute.getRightValue()) return
         val finalPrompt = resolvePrompt()
         if (finalPrompt.isLeft)
         {
@@ -53,11 +59,28 @@ class AITask(
         return triggers
     }
 
-    private fun canNotExecute(): Boolean
+    private fun canNotExecute(): Either<Exception, Boolean>
     {
-        return restrictionNames.any { restriction ->
-            restrictionChecker.check(restriction)
+        restrictionNames.forEach {
+            val check = restrictionChecker.check(it)
+            if (check.isLeft) return check
+            if (check.getRightValue()) return Either.Right(true)
         }
+        return Either.Right(false)
+    }
+
+    private fun notifyRestrictionProblem()
+    {
+        // TODO: Show the task name, so that the user knows from where the problem comes
+        val title = localizedStrings.problemOccurredWhileVerifyingConstraint
+        val message = localizedStrings.taskWillNotExecute
+        shell.interpretInput(
+            "${Notifier.NAME} " +
+                    "--notification-id 865424 " +
+                    "--title \"$title\" " +
+                    "--message \"$message\"",
+            {}, {}, {}
+        )
     }
 
 
@@ -69,26 +92,7 @@ class AITask(
                 if (it.getLeftValue() is PermissionNotGrantedException)
                 {
                     val permission = (it.getLeftValue() as PermissionNotGrantedException).permission
-                    val title = localizedStrings.taskNeedsPermissionToContinue
-                    val message = localizedStrings.touchNotificationToProceed
-                    val intentClass =
-                        "org.thinker.thinker.infrastructure.presentation.XXPermissionsActivity"
-                    val bundle = "[\n" +
-                            "    {\n" +
-                            "        \"type\": \"string\",\n" +
-                            "        \"key\": \"${XXPermissionsActivity.PERMISSION_KEY}\",\n" +
-                            "        \"value\": \"$permission\"\n" +
-                            "    }\n" +
-                            "]\n"
-                    shell.interpretInput(
-                        "${Notifier.NAME} " +
-                                "--notification-id 1 " +
-                                "--title \"$title\" " +
-                                "--message \"$message\" " +
-                                "--intent-class \"$intentClass\" " +
-                                "--bundle \"$bundle\"",
-                        {}, {}, {}
-                    )
+                    notifyPermissionProblem(permission)
                 }
                 return it
             }
@@ -98,6 +102,30 @@ class AITask(
             "data: ${data.getRightValue()}\n\n" +
                     "Programs Instructions: $programsInstructions\n\n" +
                     prompt
+        )
+    }
+
+    private fun notifyPermissionProblem(permission: String)
+    {
+        val title = localizedStrings.taskNeedsPermissionToContinue
+        val message = localizedStrings.touchNotificationToProceed
+        val intentClass =
+            "org.thinker.thinker.infrastructure.presentation.XXPermissionsActivity"
+        val bundle = "[\n" +
+                "    {\n" +
+                "        \"type\": \"string\",\n" +
+                "        \"key\": \"${XXPermissionsActivity.PERMISSION_KEY}\",\n" +
+                "        \"value\": \"$permission\"\n" +
+                "    }\n" +
+                "]\n"
+        shell.interpretInput(
+            "${Notifier.NAME} " +
+                    "--notification-id 45442 " +
+                    "--title \"$title\" " +
+                    "--message \"$message\" " +
+                    "--intent-class \"$intentClass\" " +
+                    "--bundle \"$bundle\"",
+            {}, {}, {}
         )
     }
 

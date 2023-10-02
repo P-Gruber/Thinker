@@ -1,13 +1,24 @@
 package org.thinker.thinker.infrastructure.restrictions
 
+import android.content.Context
+import org.thinker.thinker.domain.restrictioncheker.Restriction
 import org.thinker.thinker.domain.restrictioncheker.RestrictionChecker
 import org.thinker.thinker.domain.restrictioncheker.RestrictionName
+import org.thinker.thinker.domain.utils.Either
+import org.thinker.thinker.infrastructure.restrictions.restrictions.BatteryLowerThan
 
-class AndroidRestrictionChecker : RestrictionChecker
+class AndroidRestrictionChecker(private val context: Context) : RestrictionChecker
 {
-    override fun check(restriction: RestrictionName): Boolean
+    override fun check(restriction: RestrictionName): Either<Exception, Boolean>
     {
-        // TODO: Not yet implemented
-        return false
+        return getRestriction(restriction).check()
+    }
+
+    private fun getRestriction(restriction: RestrictionName): Restriction
+    {
+        return when (restriction)
+        {
+            is RestrictionName.BatteryLowerThan -> BatteryLowerThan(context, restriction.value)
+        }
     }
 }

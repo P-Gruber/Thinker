@@ -1,3 +1,6 @@
 package org.thinker.thinker.domain.restrictioncheker
 
-data class RestrictionName(val keyName: String)
+sealed class RestrictionName(val keyName: String)
+{
+    data class BatteryLowerThan(val value: Int) : RestrictionName("BatteryLowerThan")
+}

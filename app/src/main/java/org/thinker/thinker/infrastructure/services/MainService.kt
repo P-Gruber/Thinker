@@ -16,6 +16,7 @@ import org.thinker.thinker.domain.Task
 import org.thinker.thinker.domain.dataretriever.DataSourceName
 import org.thinker.thinker.domain.nlp.NLPModel
 import org.thinker.thinker.domain.osevents.Event
+import org.thinker.thinker.domain.restrictioncheker.RestrictionName
 import org.thinker.thinker.infrastructure.AndroidTaskManager
 import org.thinker.thinker.infrastructure.dataretrieving.AndroidDataRetriever
 import org.thinker.thinker.infrastructure.localization.AndroidLocalizedStrings
@@ -43,7 +44,7 @@ class MainService : Service()
         // TODO: Remove test
         val aiTask = AITask(
             AndroidShell(this),
-            AndroidRestrictionChecker(),
+            AndroidRestrictionChecker(this),
             AndroidDataRetriever(this),
             object : NLPModel
             {
@@ -56,7 +57,7 @@ class MainService : Service()
             "prompt",
             setOf(Event.Screen.TurnedOn()),
             setOf(DataSourceName.FileContent("/storage/emulated/0/Documents/mobile/Domingos.md")),
-            setOf(),
+            setOf(RestrictionName.BatteryLowerThan(44)),
             setOf("toast")
         )
         addTask(aiTask)

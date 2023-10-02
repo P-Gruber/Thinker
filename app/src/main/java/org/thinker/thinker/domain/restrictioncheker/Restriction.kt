@@ -2,7 +2,7 @@ package org.thinker.thinker.domain.restrictioncheker
 
 import org.thinker.thinker.domain.utils.Either
 
-interface RestrictionChecker
+interface Restriction
 {
-    fun check(restriction: RestrictionName): Either<Exception, Boolean>
+    fun check(): Either<Exception, Boolean>
 }
