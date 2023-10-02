@@ -11,8 +11,16 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import org.thinker.thinker.R
 import org.thinker.thinker.application.TaskManager
+import org.thinker.thinker.domain.AITask
 import org.thinker.thinker.domain.Task
+import org.thinker.thinker.domain.dataretriever.DataSourceName
+import org.thinker.thinker.domain.nlp.NLPModel
+import org.thinker.thinker.domain.osevents.Event
 import org.thinker.thinker.infrastructure.AndroidTaskManager
+import org.thinker.thinker.infrastructure.dataretrieving.AndroidDataRetriever
+import org.thinker.thinker.infrastructure.localization.AndroidLocalizedStrings
+import org.thinker.thinker.infrastructure.restrictions.AndroidRestrictionChecker
+import org.thinker.thinker.infrastructure.shell.AndroidShell
 
 class MainService : Service()
 {
@@ -30,7 +38,28 @@ class MainService : Service()
     {
         super.onCreate()
         createNotificationChannel()
-        taskManager = AndroidTaskManager(applicationContext)
+        taskManager = AndroidTaskManager(this)
+
+        // TODO: Remove test
+        val aiTask = AITask(
+            AndroidShell(this),
+            AndroidRestrictionChecker(),
+            AndroidDataRetriever(this),
+            object : NLPModel
+            {
+                override fun submitPrompt(prompt: String): String
+                {
+                    return "toast -t \"Faked response\""
+                }
+            },
+            AndroidLocalizedStrings(this),
+            "prompt",
+            setOf(Event.Screen.TurnedOn()),
+            setOf(DataSourceName.FileContent("/storage/emulated/0/Documents/mobile/Domingos.md")),
+            setOf(),
+            setOf("toast")
+        )
+        addTask(aiTask)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
@@ -65,6 +94,8 @@ class MainService : Service()
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setDefaults(0)
             .build()
     }
 
@@ -72,9 +103,13 @@ class MainService : Service()
     {
         val serviceChannel = NotificationChannel(
             CHANNEL_ID,
-            "Tasks Notifications", // TODO: Localize it
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
+            getString(R.string.tasks_notifications),
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            setSound(null, null)
+            enableLights(false)
+            enableVibration(false)
+        }
 
         val manager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -83,7 +118,7 @@ class MainService : Service()
 
     companion object
     {
-        private const val NOTIFICATION_ID = 1
+        private const val NOTIFICATION_ID = 564234544
         private const val CHANNEL_ID = "Main"
     }
 }

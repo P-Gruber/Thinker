@@ -11,6 +11,10 @@ sealed class Either<out L, out R>
         is Right -> onRight(value)
     }
 
+    fun getLeftValue() = (this as Left).value
+
+    fun getRightValue() = (this as Right).value
+
     val isLeft: Boolean get() = this is Left
     val isRight: Boolean get() = this is Right
 }

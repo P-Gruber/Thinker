@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -10,19 +14,24 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Thinker"
         tools:targetApi="31">
+        <activity
+            android:name=".infrastructure.presentation.XXPermissionsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_xxpermissions"
+            android:theme="@style/Theme.Thinker" />
+
         <service
             android:name=".infrastructure.services.MainService"
             android:enabled="true"
-            android:exported="true">
-
-        </service>
+            android:exported="true" />
 
         <activity
-            android:name=".infrastructure.MainActivity"
+            android:name=".infrastructure.presentation.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Thinker">
             <intent-filter>

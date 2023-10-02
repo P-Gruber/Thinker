@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Thinker</string>
+    <string name="title_activity_xxpermissions">Permissions Activity</string>
+    <string name="task_needs_permission_to_continue">A task needs permission to continue</string>
+    <string name="touch_notification_to_proceed">Touch this notification to proceed.</string>
+    <string name="tasks_notifications">Tasks Notifications</string>
 </resources>

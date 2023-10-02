@@ -1,4 +1,4 @@
-package org.thinker.thinker.infrastructure
+package org.thinker.thinker.infrastructure.presentation
 
 import android.content.ComponentName
 import android.content.Context
@@ -15,13 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import org.thinker.thinker.domain.AITask
-import org.thinker.thinker.domain.nlp.NLPModel
-import org.thinker.thinker.domain.osevents.Event
-import org.thinker.thinker.infrastructure.dataretrieving.AndroidDataRetriever
-import org.thinker.thinker.infrastructure.restrictions.AndroidRestrictionChecker
 import org.thinker.thinker.infrastructure.services.MainService
-import org.thinker.thinker.infrastructure.shell.AndroidShell
 import org.thinker.thinker.infrastructure.ui.theme.ThinkerTheme
 
 class MainActivity : ComponentActivity()
@@ -36,26 +30,6 @@ class MainActivity : ComponentActivity()
             val binder = service as MainService.LocalBinder
             mainService = binder.getService()
             isServiceBound = true
-
-            // TODO: Remove test
-            val aiTask = AITask(
-                AndroidShell(applicationContext),
-                AndroidRestrictionChecker(),
-                AndroidDataRetriever(),
-                object : NLPModel
-                {
-                    override fun submitPrompt(prompt: String): String
-                    {
-                        return "toast -t \"Faked response\""
-                    }
-                },
-                "prompt",
-                setOf(Event.Screen.TurnedOn()),
-                setOf(),
-                setOf(),
-                setOf("toast")
-            )
-            mainService.addTask(aiTask)
         }
 
         override fun onServiceDisconnected(arg0: ComponentName)
