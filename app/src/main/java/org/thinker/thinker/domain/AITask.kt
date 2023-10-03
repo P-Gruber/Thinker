@@ -29,29 +29,49 @@ class AITask(
 
     override fun execute()
     {
-        val canNotExecute = canNotExecute()
-        if (canNotExecute.isLeft)
+        if (mustAbort()) return
+
+        val finalPrompt = resolvePrompt().rightOrNullAndRun {
+            when (value)
+            {
+                is PermissionNotGrantedException -> notifyPermissionProblem(value.permission)
+                else -> notifyPromptProblem() // TODO: be more specific: program not found, etc
+            }
+        } ?: return
+
+        val input = nlpModel.submitPrompt(finalPrompt).rightOrNullAndRun {
+            notifyPromptProblem() // TODO: be more specific: internet, parsing, etc
+        } ?: return
+
+        val exitCode = shell.interpretInput(input, {}, {}, { })
+        if (exitCode != Shell.ExitCodes.SUCCESS)
         {
+            notifyPromptProblem() // TODO: be more specific: program not found, etc
+        }
+    }
+
+    private fun mustAbort(): Boolean
+    {
+        val aRestrictionIsActive = isAnyRestrictionActive().rightOrNullAndRun {
             notifyRestrictionProblem()
-            return
+            return true
         }
-        if (canNotExecute.getRightValue()) return
-        val finalPrompt = resolvePrompt()
-        if (finalPrompt.isLeft)
-        {
-            shell.interpretInput(
-                "toast -t \"An error has occurred: ${finalPrompt.getLeftValue().message}\"",
-                {}, {}, {}
-            )
-            return
-        }
-//        val response = nlpModel.submitPrompt(finalPrompt)
-        var response = ":("
-        finalPrompt.fold({}) {
-            response = "toast -t \"$it\""
-        }
-        shell.interpretInput(response, {}, {}, { })
-        // TODO: handle failure scenario (also response is not a command)
+        if (aRestrictionIsActive == true) return true
+        return false
+    }
+
+    private fun notifyPromptProblem()
+    {
+        // TODO: Show the task name, so that the user knows from where the problem comes
+        val title = localizedStrings.problemOccurredWhileMakingPrompt
+        val message = localizedStrings.taskWillNotExecute
+        shell.interpretInput(
+            "${Notifier.NAME} " +
+                    "--notification-id 47318 " +
+                    "--title \"$title\" " +
+                    "--message \"$message\"",
+            {}, {}, {}
+        )
     }
 
     override fun getTriggeringEvents(): Set<Event>
@@ -59,12 +79,17 @@ class AITask(
         return triggers
     }
 
-    private fun canNotExecute(): Either<Exception, Boolean>
+    private fun isAnyRestrictionActive(): Either<Exception, Boolean>
     {
         restrictionNames.forEach {
-            val check = restrictionChecker.check(it)
-            if (check.isLeft) return check
-            if (check.getRightValue()) return Either.Right(true)
+            restrictionChecker.check(it).fold(
+                { exception ->
+                    return Either.Left(exception)
+                },
+                { isActive ->
+                    if (isActive) return Either.Right(true)
+                }
+            )
         }
         return Either.Right(false)
     }
@@ -86,20 +111,16 @@ class AITask(
 
     private fun resolvePrompt(): Either<Exception, String>
     {
-        val data = retrieveData().also {
-            if (it.isLeft)
-            {
-                if (it.getLeftValue() is PermissionNotGrantedException)
-                {
-                    val permission = (it.getLeftValue() as PermissionNotGrantedException).permission
-                    notifyPermissionProblem(permission)
-                }
-                return it
-            }
+        val data = retrieveData().rightOrNullAndRun {
+            return this
         }
-        val programsInstructions = getProgramsInstructions()
+
+        val programsInstructions = getProgramsInstructions().rightOrNullAndRun {
+            return this
+        }
+
         return Either.Right(
-            "data: ${data.getRightValue()}\n\n" +
+            "data: ${data}\n\n" +
                     "Programs Instructions: $programsInstructions\n\n" +
                     prompt
         )
@@ -135,11 +156,10 @@ class AITask(
 
         for (dataSource in dataSourceNames)
         {
-            when (val data = dataRetriever.retrieveData(dataSource))
-            {
-                is Either.Right -> stringBuilder.append(data.value).append("\n\n")
-                is Either.Left -> return data
+            val data = dataRetriever.retrieveData(dataSource).rightOrNullAndRun {
+                return this
             }
+            stringBuilder.append(data).append("\n\n")
         }
 
         // Remove the last "\n\n" for cleaner output.
@@ -152,18 +172,24 @@ class AITask(
     }
 
 
-    private fun getProgramsInstructions(): String
+    private fun getProgramsInstructions(): Either<Exception, String>
     {
-        return actions.joinToString("\n\n") { program ->
+        val instructions = mutableListOf<String>()
+
+        for (program in actions)
+        {
             var instruction = ""
-            shell.interpretInput(
+            val exitCode = shell.interpretInput(
                 "$program --help",
                 {},
                 stdout = { output -> instruction = output },
                 {}
             )
-            instruction
+            if (exitCode == Shell.ExitCodes.SUCCESS) instructions.add(instruction)
+            else return Either.Left(Exception())
         }
+
+        return Either.Right(instructions.joinToString("\n\n"))
     }
 
 }

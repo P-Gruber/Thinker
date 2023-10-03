@@ -8,5 +8,7 @@ abstract class LocalizedStrings
 
     abstract val problemOccurredWhileVerifyingConstraint: String
 
-    abstract val taskWillNotExecute: Any
+    abstract val taskWillNotExecute: String
+
+    abstract val problemOccurredWhileMakingPrompt: String
 }

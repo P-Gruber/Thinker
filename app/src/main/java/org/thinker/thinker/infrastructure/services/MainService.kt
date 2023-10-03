@@ -17,6 +17,7 @@ import org.thinker.thinker.domain.dataretriever.DataSourceName
 import org.thinker.thinker.domain.nlp.NLPModel
 import org.thinker.thinker.domain.osevents.Event
 import org.thinker.thinker.domain.restrictioncheker.RestrictionName
+import org.thinker.thinker.domain.utils.Either
 import org.thinker.thinker.infrastructure.AndroidTaskManager
 import org.thinker.thinker.infrastructure.dataretrieving.AndroidDataRetriever
 import org.thinker.thinker.infrastructure.localization.AndroidLocalizedStrings
@@ -48,16 +49,16 @@ class MainService : Service()
             AndroidDataRetriever(this),
             object : NLPModel
             {
-                override fun submitPrompt(prompt: String): String
+                override fun submitPrompt(prompt: String): Either<Exception, String>
                 {
-                    return "toast -t \"Faked response\""
+                    return Either.Right("toast -t \"$prompt\"")
                 }
             },
             AndroidLocalizedStrings(this),
             "prompt",
             setOf(Event.Screen.TurnedOn()),
             setOf(DataSourceName.FileContent("/storage/emulated/0/Documents/mobile/Domingos.md")),
-            setOf(RestrictionName.BatteryLowerThan(44)),
+            setOf(RestrictionName.BatteryLowerThan(20)),
             setOf("toast")
         )
         addTask(aiTask)

@@ -13,6 +13,9 @@ class AndroidLocalizedStrings(private val context: Context) : LocalizedStrings()
         get() = context.getString(R.string.touch_notification_to_proceed)
     override val problemOccurredWhileVerifyingConstraint: String
         get() = context.getString(R.string.problem_occurred_while_verifying_constraint)
-    override val taskWillNotExecute: Any
+    override val taskWillNotExecute: String
         get() = context.getString(R.string.task_will_not_execute)
+
+    override val problemOccurredWhileMakingPrompt: String
+        get() = context.getString(R.string.problem_occurred_while_making_prompt)
 }
