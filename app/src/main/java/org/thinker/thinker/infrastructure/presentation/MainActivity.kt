@@ -15,8 +15,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import org.thinker.thinker.infrastructure.presentation.ui.theme.ThinkerTheme
 import org.thinker.thinker.infrastructure.services.MainService
-import org.thinker.thinker.infrastructure.ui.theme.ThinkerTheme
 
 class MainActivity : ComponentActivity()
 {

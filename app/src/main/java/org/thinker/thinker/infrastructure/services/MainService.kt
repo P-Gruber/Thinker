@@ -18,11 +18,11 @@ import org.thinker.thinker.domain.nlp.NLPModel
 import org.thinker.thinker.domain.osevents.Event
 import org.thinker.thinker.domain.restrictioncheker.RestrictionName
 import org.thinker.thinker.domain.utils.Either
-import org.thinker.thinker.infrastructure.AndroidTaskManager
-import org.thinker.thinker.infrastructure.dataretrieving.AndroidDataRetriever
-import org.thinker.thinker.infrastructure.localization.AndroidLocalizedStrings
-import org.thinker.thinker.infrastructure.restrictions.AndroidRestrictionChecker
-import org.thinker.thinker.infrastructure.shell.AndroidShell
+import org.thinker.thinker.infrastructure.core.AndroidTaskManager
+import org.thinker.thinker.infrastructure.core.dataretrieving.AndroidDataRetriever
+import org.thinker.thinker.infrastructure.core.localization.AndroidLocalizedStrings
+import org.thinker.thinker.infrastructure.core.restrictions.AndroidRestrictionChecker
+import org.thinker.thinker.infrastructure.core.shell.AndroidShell
 
 class MainService : Service()
 {

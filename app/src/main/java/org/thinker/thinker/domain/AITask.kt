@@ -10,8 +10,8 @@ import org.thinker.thinker.domain.restrictioncheker.RestrictionChecker
 import org.thinker.thinker.domain.restrictioncheker.RestrictionName
 import org.thinker.thinker.domain.shell.Shell
 import org.thinker.thinker.domain.utils.Either
+import org.thinker.thinker.infrastructure.core.shell.builtin.Notifier
 import org.thinker.thinker.infrastructure.presentation.XXPermissionsActivity
-import org.thinker.thinker.infrastructure.shell.builtin.Notifier
 
 class AITask(
     private val shell: Shell,
