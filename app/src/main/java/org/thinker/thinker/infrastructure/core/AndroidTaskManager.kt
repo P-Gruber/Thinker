@@ -1,6 +1,9 @@
 package org.thinker.thinker.infrastructure.core
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.thinker.thinker.application.TaskManager
 import org.thinker.thinker.domain.Task
 import org.thinker.thinker.domain.osevents.Event
@@ -45,7 +48,9 @@ class AndroidTaskManager(context: Context) : TaskManager
             task.getTriggeringEvents().forEach triggers@{ taskEvent ->
                 if (taskEvent == event)
                 {
-                    task.execute()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        task.execute()
+                    }
                     return@triggers
                 }
             }

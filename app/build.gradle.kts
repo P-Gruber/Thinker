@@ -71,4 +71,7 @@ dependencies {
 
     implementation("com.beust:jcommander:1.78")
     implementation("com.github.getActivity:XXPermissions:18.3")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 }

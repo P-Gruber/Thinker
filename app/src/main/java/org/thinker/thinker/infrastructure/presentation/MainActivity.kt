@@ -74,6 +74,11 @@ class MainActivity : ComponentActivity()
             isServiceBound = false
         }
     }
+
+    companion object
+    {
+        const val DEBUGGING = true
+    }
 }
 
 @Composable

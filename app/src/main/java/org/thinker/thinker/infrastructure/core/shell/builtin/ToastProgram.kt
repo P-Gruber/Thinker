@@ -7,6 +7,9 @@ import com.beust.jcommander.IStringConverter
 import com.beust.jcommander.JCommander
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.ParameterException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.thinker.thinker.domain.shell.Program
 import org.thinker.thinker.domain.shell.Shell
 
@@ -59,7 +62,9 @@ class ToastProgram(private val context: Context) : Program
 
     private fun showToast(text: String, duration: Int): Int
     {
-        Toast.makeText(context, text, duration).show()
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(context, text, duration).show()
+        }
         return Shell.ExitCodes.SUCCESS
     }
 

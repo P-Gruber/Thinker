@@ -4,8 +4,9 @@ import org.thinker.thinker.domain.dataretriever.DataRetriever
 import org.thinker.thinker.domain.dataretriever.DataSourceName
 import org.thinker.thinker.domain.dataretriever.PermissionNotGrantedException
 import org.thinker.thinker.domain.localization.LocalizedStrings
-import org.thinker.thinker.domain.nlp.NLPModel
 import org.thinker.thinker.domain.osevents.Event
+import org.thinker.thinker.domain.repository.NLPModelException
+import org.thinker.thinker.domain.repository.NLPModelRepo
 import org.thinker.thinker.domain.restrictioncheker.RestrictionChecker
 import org.thinker.thinker.domain.restrictioncheker.RestrictionName
 import org.thinker.thinker.domain.shell.Shell
@@ -17,17 +18,22 @@ class AITask(
     private val shell: Shell,
     private val restrictionChecker: RestrictionChecker,
     private val dataRetriever: DataRetriever,
-    private val nlpModel: NLPModel,
+    private val nlpModelRepo: NLPModelRepo,
     private val localizedStrings: LocalizedStrings,
     private val prompt: String,
     override val triggers: Set<Event>,
     override val dataSourceNames: Set<DataSourceName>,
     override val restrictionNames: Set<RestrictionName>,
     override val actions: Set<String>
-) : Task(shell, restrictionChecker, dataRetriever)
+) : Task()
 {
 
-    override fun execute()
+    override fun getTriggeringEvents(): Set<Event>
+    {
+        return triggers
+    }
+
+    override suspend fun execute()
     {
         if (mustAbort()) return
 
@@ -35,48 +41,39 @@ class AITask(
             when (value)
             {
                 is PermissionNotGrantedException -> notifyPermissionProblem(value.permission)
-                else -> notifyPromptProblem() // TODO: be more specific: program not found, etc
+                // TODO: be more specific: program not found, etc
+                // TODO: Show the task name, so that the user knows from where the problem comes
+                else -> notifyMessage(
+                    237954,
+                    localizedStrings.problemOccurredWhileMakingPrompt,
+                    localizedStrings.taskWillNotExecute
+                )
             }
         } ?: return
 
-        val input = nlpModel.submitPrompt(finalPrompt).rightOrNullAndRun {
-            notifyPromptProblem() // TODO: be more specific: internet, parsing, etc
+        val input = nlpModelRepo.getResponse(finalPrompt).rightOrNullAndRun {
+            notifyNLPModelProblem(value)
         } ?: return
 
-        val exitCode = shell.interpretInput(input, {}, {}, { })
+        val exitCode = shell.interpretInput(input, {}, {}, {})
         if (exitCode != Shell.ExitCodes.SUCCESS)
         {
-            notifyPromptProblem() // TODO: be more specific: program not found, etc
+            notifyShellProblem(exitCode)
         }
     }
 
     private fun mustAbort(): Boolean
     {
         val aRestrictionIsActive = isAnyRestrictionActive().rightOrNullAndRun {
-            notifyRestrictionProblem()
+            notifyMessage(
+                865424,
+                localizedStrings.problemOccurredWhileVerifyingConstraint,
+                localizedStrings.taskWillNotExecute
+            )
             return true
         }
         if (aRestrictionIsActive == true) return true
         return false
-    }
-
-    private fun notifyPromptProblem()
-    {
-        // TODO: Show the task name, so that the user knows from where the problem comes
-        val title = localizedStrings.problemOccurredWhileMakingPrompt
-        val message = localizedStrings.taskWillNotExecute
-        shell.interpretInput(
-            "${Notifier.NAME} " +
-                    "--notification-id 47318 " +
-                    "--title \"$title\" " +
-                    "--message \"$message\"",
-            {}, {}, {}
-        )
-    }
-
-    override fun getTriggeringEvents(): Set<Event>
-    {
-        return triggers
     }
 
     private fun isAnyRestrictionActive(): Either<Exception, Boolean>
@@ -94,23 +91,10 @@ class AITask(
         return Either.Right(false)
     }
 
-    private fun notifyRestrictionProblem()
-    {
-        // TODO: Show the task name, so that the user knows from where the problem comes
-        val title = localizedStrings.problemOccurredWhileVerifyingConstraint
-        val message = localizedStrings.taskWillNotExecute
-        shell.interpretInput(
-            "${Notifier.NAME} " +
-                    "--notification-id 865424 " +
-                    "--title \"$title\" " +
-                    "--message \"$message\"",
-            {}, {}, {}
-        )
-    }
-
 
     private fun resolvePrompt(): Either<Exception, String>
     {
+        // TODO: Ensure the size does not exceed the limit
         val data = retrieveData().rightOrNullAndRun {
             return this
         }
@@ -123,30 +107,6 @@ class AITask(
             "data: ${data}\n\n" +
                     "Programs Instructions: $programsInstructions\n\n" +
                     prompt
-        )
-    }
-
-    private fun notifyPermissionProblem(permission: String)
-    {
-        val title = localizedStrings.taskNeedsPermissionToContinue
-        val message = localizedStrings.touchNotificationToProceed
-        val intentClass =
-            "org.thinker.thinker.infrastructure.presentation.XXPermissionsActivity"
-        val bundle = "[\n" +
-                "    {\n" +
-                "        \"type\": \"string\",\n" +
-                "        \"key\": \"${XXPermissionsActivity.PERMISSION_KEY}\",\n" +
-                "        \"value\": \"$permission\"\n" +
-                "    }\n" +
-                "]\n"
-        shell.interpretInput(
-            "${Notifier.NAME} " +
-                    "--notification-id 45442 " +
-                    "--title \"$title\" " +
-                    "--message \"$message\" " +
-                    "--intent-class \"$intentClass\" " +
-                    "--bundle \"$bundle\"",
-            {}, {}, {}
         )
     }
 
@@ -190,6 +150,71 @@ class AITask(
         }
 
         return Either.Right(instructions.joinToString("\n\n"))
+    }
+
+    private fun notifyShellProblem(exitCode: Int)
+    {
+        val message = when (exitCode)
+        {
+            1 -> localizedStrings.unexpectedProblem
+            2 -> localizedStrings.misuseOfShellBuiltinOrIncorrectCommandUsage
+            3 -> localizedStrings.parsingError
+            126 -> localizedStrings.commandInvokedCannotExecute
+            127 -> localizedStrings.commandNotFound
+            128 -> localizedStrings.invalidExitArgument
+            else -> localizedStrings.unexpectedProblem
+        }
+        notifyMessage(237954, localizedStrings.problemOccurredWhileGeneratingResponse, message)
+    }
+
+    private fun notifyNLPModelProblem(exception: NLPModelException)
+    {
+        val message = when (exception)
+        {
+            is NLPModelException.NoInternet -> localizedStrings.noInternet
+            is NLPModelException.Client -> localizedStrings.clientSideIssue
+            is NLPModelException.Forbidden -> localizedStrings.clientSideIssue
+            is NLPModelException.TooManyRequests -> localizedStrings.tooManyRequests
+            is NLPModelException.Server -> localizedStrings.serverSideIssue
+            is NLPModelException.Unauthorized -> localizedStrings.apiKeyNotProvidedOrInvalid
+            is NLPModelException.Unexpected -> localizedStrings.unexpectedProblem
+        }
+        notifyMessage(237954, localizedStrings.problemOccurredWhileGeneratingResponse, message)
+    }
+
+    private fun notifyPermissionProblem(permission: String)
+    {
+        val title = localizedStrings.taskNeedsPermissionToContinue
+        val message = localizedStrings.touchNotificationToProceed
+        val intentClass =
+            "org.thinker.thinker.infrastructure.presentation.XXPermissionsActivity"
+        val bundle = "[\n" +
+                "    {\n" +
+                "        \"type\": \"string\",\n" +
+                "        \"key\": \"${XXPermissionsActivity.PERMISSION_KEY}\",\n" +
+                "        \"value\": \"$permission\"\n" +
+                "    }\n" +
+                "]\n"
+        shell.interpretInput(
+            "${Notifier.NAME} " +
+                    "--notification-id 45442 " +
+                    "--title \"$title\" " +
+                    "--message \"$message\" " +
+                    "--intent-class \"$intentClass\" " +
+                    "--bundle \"$bundle\"",
+            {}, {}, {}
+        )
+    }
+
+    private fun notifyMessage(id: Int, title: String, message: String)
+    {
+        shell.interpretInput(
+            "${Notifier.NAME} " +
+                    "--notification-id $id " +
+                    "--title \"$title\" " +
+                    "--message \"$message\"",
+            {}, {}, {}
+        )
     }
 
 }

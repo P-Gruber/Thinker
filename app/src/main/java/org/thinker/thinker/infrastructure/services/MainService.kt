@@ -14,15 +14,15 @@ import org.thinker.thinker.application.TaskManager
 import org.thinker.thinker.domain.AITask
 import org.thinker.thinker.domain.Task
 import org.thinker.thinker.domain.dataretriever.DataSourceName
-import org.thinker.thinker.domain.nlp.NLPModel
 import org.thinker.thinker.domain.osevents.Event
 import org.thinker.thinker.domain.restrictioncheker.RestrictionName
-import org.thinker.thinker.domain.utils.Either
 import org.thinker.thinker.infrastructure.core.AndroidTaskManager
 import org.thinker.thinker.infrastructure.core.dataretrieving.AndroidDataRetriever
 import org.thinker.thinker.infrastructure.core.localization.AndroidLocalizedStrings
 import org.thinker.thinker.infrastructure.core.restrictions.AndroidRestrictionChecker
 import org.thinker.thinker.infrastructure.core.shell.AndroidShell
+import org.thinker.thinker.infrastructure.data.ChatGPTRepo
+import org.thinker.thinker.infrastructure.data.remote.ChatGptApi
 
 class MainService : Service()
 {
@@ -47,15 +47,9 @@ class MainService : Service()
             AndroidShell(this),
             AndroidRestrictionChecker(this),
             AndroidDataRetriever(this),
-            object : NLPModel
-            {
-                override fun submitPrompt(prompt: String): Either<Exception, String>
-                {
-                    return Either.Right("toast -t \"$prompt\"")
-                }
-            },
+            ChatGPTRepo(ChatGptApi()),
             AndroidLocalizedStrings(this),
-            "prompt",
+            "You are a nlp to command line translator, a subsystem process your response and pass it to a cli. strictly follow the pattern of a command line. You are only allowed to respond 1 command at a time, for example: \"toast -t \"hi\"\". no any other text.",
             setOf(Event.Screen.TurnedOn()),
             setOf(DataSourceName.FileContent("/storage/emulated/0/Documents/mobile/Domingos.md")),
             setOf(RestrictionName.BatteryLowerThan(20)),

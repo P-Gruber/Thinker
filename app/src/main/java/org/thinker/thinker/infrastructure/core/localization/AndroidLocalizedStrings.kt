@@ -18,4 +18,41 @@ class AndroidLocalizedStrings(private val context: Context) : LocalizedStrings()
 
     override val problemOccurredWhileMakingPrompt: String
         get() = context.getString(R.string.problem_occurred_while_making_prompt)
+
+    override val problemOccurredWhileGeneratingResponse: String
+        get() = context.getString(R.string.problem_occurred_while_generating_response)
+
+    override val clientSideIssue: String
+        get() = context.getString(R.string.client_side_issue)
+
+    override val unexpectedProblem: String
+        get() = context.getString(R.string.unexpected_problem)
+
+    override val apiKeyNotProvidedOrInvalid: String
+        get() = context.getString(R.string.api_key_not_provided_or_invalid)
+
+    override val serverSideIssue: String
+        get() = context.getString(R.string.server_side_issue)
+
+    override val noInternet: String
+        get() = context.getString(R.string.no_internet)
+
+    override val invalidExitArgument: String
+        get() = context.getString(R.string.invalid_exit_argument)
+
+    override val commandNotFound: String
+        get() = context.getString(R.string.command_not_found)
+
+    override val commandInvokedCannotExecute: String
+        get() = context.getString(R.string.command_invoked_cannot_execute)
+
+    override val parsingError: String
+        get() = context.getString(R.string.parsing_error)
+
+    override val misuseOfShellBuiltinOrIncorrectCommandUsage: String
+        get() = context.getString(R.string.misuse_of_shell_builtin_or_incorrect_command_usage)
+
+    override val tooManyRequests: String
+        get() = context.getString(R.string.too_many_requests)
+
 }
