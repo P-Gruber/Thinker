@@ -1,6 +1,5 @@
 package org.thinker.thinker.infrastructure.core.shell.builtin
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -10,6 +9,7 @@ import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Bundle
+import androidx.core.app.NotificationCompat
 import com.beust.jcommander.IParameterValidator
 import com.beust.jcommander.IStringConverter
 import com.beust.jcommander.JCommander
@@ -80,9 +80,12 @@ class Notifier(private val context: Context) : Program
     {
         createNotificationChannel()
 
-        val builder = Notification.Builder(context, NOTIFICATION_CHANNEL_ID).apply {
+        val builder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID).apply {
             setContentTitle(title)
-            message?.let { setContentText(it) }
+            message?.let {
+                setContentText(it)
+                setStyle(NotificationCompat.BigTextStyle().bigText(it))
+            }
             className?.let {
                 val intent = Intent(context, it).apply {
                     putExtras(bundle!!)

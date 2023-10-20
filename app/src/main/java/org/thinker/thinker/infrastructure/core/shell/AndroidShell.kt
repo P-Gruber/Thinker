@@ -3,6 +3,7 @@ package org.thinker.thinker.infrastructure.core.shell
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.util.Log
 import org.thinker.thinker.domain.shell.Program
 import org.thinker.thinker.domain.shell.Shell
 import org.thinker.thinker.infrastructure.core.shell.builtin.Notifier
@@ -22,6 +23,7 @@ class AndroidShell(private val context: Context) : Shell
         stderr: (String) -> Unit
     ): Int
     {
+        Log.d("AITask", input)
         if (input.isBlank()) return Shell.ExitCodes.SUCCESS
         val parsedInput = parseCommand(input)
 

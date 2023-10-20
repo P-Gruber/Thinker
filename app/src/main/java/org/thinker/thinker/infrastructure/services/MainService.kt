@@ -49,11 +49,19 @@ class MainService : Service()
             AndroidDataRetriever(this),
             ChatGPTRepo(ChatGptApi()),
             AndroidLocalizedStrings(this),
-            "You are a nlp to command line translator, a subsystem process your response and pass it to a cli. strictly follow the pattern of a command line. You are only allowed to respond 1 command at a time, for example: \"toast -t \"hi\"\". no any other text.",
+            "Remind me my next task only 1 hour before. You will do it using the pattern \"Remember to <task name>\".",
             setOf(Event.Screen.TurnedOn()),
-            setOf(DataSourceName.FileContent("/storage/emulated/0/Documents/mobile/Domingos.md")),
+//            setOf(DataSourceName.FileContent("/storage/emulated/0/Documents/mobile/Domingos.md")),
+            setOf(
+                DataSourceName.DailyFileContent(
+                    "/storage/emulated/0/Documents/mobile/daily-notes/",
+                    "yyyy-MM-dd",
+                    "md"
+                ),
+                DataSourceName.TimeOfDay()
+            ),
             setOf(RestrictionName.BatteryLowerThan(20)),
-            setOf("toast")
+            setOf("notifier", "do-nothing")
         )
         addTask(aiTask)
     }

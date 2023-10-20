@@ -11,8 +11,15 @@ import org.thinker.thinker.domain.utils.Either
 import org.thinker.thinker.infrastructure.presentation.XXPermissionsActivity
 import java.io.File
 import java.io.FileNotFoundException
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-class FileContent(private val context: Context, private val filePath: String) : DataSource
+class DailyFileContent(
+    private val context: Context,
+    private val folder: String,
+    private val dateTimeFormat: String,
+    private val fileExtension: String
+) : DataSource
 {
     override fun retrieveData(): Either<DataRetrieverException, String>
     {
@@ -22,10 +29,18 @@ class FileContent(private val context: Context, private val filePath: String) : 
             return Either.Left(PermissionNotGranted(permission))
         }
 
+        val dateTimeFormatted = runCatching {
+            val dateTime = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ofPattern(dateTimeFormat)
+            dateTime.format(formatter)
+        }.getOrDefault(dateTimeFormat)
+
+        val filePath = "$folder$dateTimeFormatted.$fileExtension"
+
         return try
         {
             val content = File(filePath).readText(Charsets.UTF_8)
-            Either.Right(content)
+            Either.Right("File content: \n$content")
         } catch (e: Exception)
         {
             val exception = when (e)

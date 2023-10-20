@@ -35,4 +35,6 @@ abstract class LocalizedStrings
     abstract val misuseOfShellBuiltinOrIncorrectCommandUsage: String
 
     abstract val tooManyRequests: String
+
+    abstract val fileNotFound: String
 }

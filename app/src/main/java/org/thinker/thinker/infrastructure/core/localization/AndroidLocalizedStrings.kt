@@ -55,4 +55,7 @@ class AndroidLocalizedStrings(private val context: Context) : LocalizedStrings()
     override val tooManyRequests: String
         get() = context.getString(R.string.too_many_requests)
 
+    override val fileNotFound: String
+        get() = context.getString(R.string.file_not_found)
+
 }

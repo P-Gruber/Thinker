@@ -4,5 +4,5 @@ import org.thinker.thinker.domain.utils.Either
 
 interface DataRetriever
 {
-    fun retrieveData(dataSourceName: DataSourceName): Either<Exception, String>
+    fun retrieveData(dataSourceName: DataSourceName): Either<DataRetrieverException, String>
 }
