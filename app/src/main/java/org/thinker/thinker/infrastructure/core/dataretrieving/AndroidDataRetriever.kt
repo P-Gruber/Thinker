@@ -8,6 +8,7 @@ import org.thinker.thinker.domain.dataretriever.DataSourceName
 import org.thinker.thinker.domain.utils.Either
 import org.thinker.thinker.infrastructure.core.dataretrieving.datasources.DailyFileContent
 import org.thinker.thinker.infrastructure.core.dataretrieving.datasources.FileContent
+import org.thinker.thinker.infrastructure.core.dataretrieving.datasources.TimeOfDay
 
 class AndroidDataRetriever(private val context: Context) : DataRetriever
 {
@@ -21,6 +22,14 @@ class AndroidDataRetriever(private val context: Context) : DataRetriever
         return when (dataSourceName)
         {
             is DataSourceName.FileContent -> FileContent(context, dataSourceName.filePath)
+            is DataSourceName.DailyFileContent -> DailyFileContent(
+                context,
+                dataSourceName.folder,
+                dataSourceName.dateTimeFormat,
+                dataSourceName.fileExtension
+            )
+
+            is DataSourceName.TimeOfDay -> TimeOfDay()
         }
     }
 }
