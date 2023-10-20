@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.util.Log
 import org.thinker.thinker.domain.shell.Program
 import org.thinker.thinker.domain.shell.Shell
+import org.thinker.thinker.infrastructure.core.shell.builtin.DoNothing
 import org.thinker.thinker.infrastructure.core.shell.builtin.Notifier
 import org.thinker.thinker.infrastructure.core.shell.builtin.ToastProgram
 
@@ -77,6 +78,7 @@ class AndroidShell(private val context: Context) : Shell
         {
             ToastProgram.NAME -> ToastProgram(context)
             Notifier.NAME -> Notifier(context)
+            DoNothing.NAME -> DoNothing()
             else -> null
         }?.also {
             nameToBuiltinProgram[programName] = it
