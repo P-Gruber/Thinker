@@ -7,6 +7,7 @@ import org.thinker.thinker.domain.osevents.SystemEventObserver
 import org.thinker.thinker.domain.osevents.SystemEvents
 import org.thinker.thinker.domain.utils.Either
 import org.thinker.thinker.infrastructure.core.AndroidTaskManager
+import org.thinker.thinker.infrastructure.core.osevents.events.DailyTime
 import org.thinker.thinker.infrastructure.core.osevents.events.ScreenEvent
 
 class AndroidEvents(private val context: Context, private val observer: AndroidTaskManager) :
@@ -20,6 +21,7 @@ class AndroidEvents(private val context: Context, private val observer: AndroidT
             when (event)
             {
                 is Event.Screen -> ScreenEvent(context, this)
+                is Event.DateTime.DailyTime -> DailyTime(context, this, event.timeOfDay)
             }
         }
         return systemEvent?.subscribeTo(event) ?: Either.Left(Exception())

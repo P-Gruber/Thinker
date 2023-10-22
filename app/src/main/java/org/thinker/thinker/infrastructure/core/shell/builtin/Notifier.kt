@@ -151,7 +151,7 @@ class Notifier(private val context: Context) : Program
 
         @Parameter(
             names = ["-ni", "--notification-id"],
-            description = "The id of the notification",
+            description = "The id of the notification. Type: Integer.",
             required = true
         )
         var notificationId: Int? = null
@@ -168,7 +168,7 @@ class Notifier(private val context: Context) : Program
 
         @Parameter(
             names = ["-ic", "--intent-class"],
-            description = "The class of the activity that is wanted to be launched. \n" +
+            description = "The class of the activity that is wanted to be launched (if you are an AI you must not use it). \n" +
                     "Example: com.example.activities.MainActivity",
             validateWith = [ClassValidator::class],
             converter = ClassConverter::class
@@ -177,7 +177,7 @@ class Notifier(private val context: Context) : Program
 
         @Parameter(
             names = ["-b", "--bundle"],
-            description = "The bundle to be passed to the activity. \n" +
+            description = "The bundle to be passed to the activity (if you are an AI you must not use it). \n" +
                     "Example: \"[\n" +
                     "    {\n" +
                     "        \"type\": \"string\",\n" +

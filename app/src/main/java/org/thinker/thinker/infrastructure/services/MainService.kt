@@ -49,9 +49,9 @@ class MainService : Service()
             AndroidDataRetriever(this),
             ChatGPTRepo(ChatGptApi()),
             AndroidLocalizedStrings(this),
-            "Remind me my next task only 1 hour before. You will do it using the pattern \"Remember to <task name>\".",
-            setOf(Event.Screen.TurnedOn()),
-//            setOf(DataSourceName.FileContent("/storage/emulated/0/Documents/mobile/Domingos.md")),
+//            "Remind me my next task only 1 hour before. You will do it using the pattern \"Remember to <task name>\".",
+            "Send me a notification with all my uncompleted tasks",
+            setOf(Event.DateTime.DailyTime("10:00")),
             setOf(
                 DataSourceName.DailyFileContent(
                     "/storage/emulated/0/Documents/mobile/daily-notes/",

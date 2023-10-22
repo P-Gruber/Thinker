@@ -3,12 +3,12 @@ package org.thinker.thinker.infrastructure.core.shell
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.util.Log
 import org.thinker.thinker.domain.shell.Program
 import org.thinker.thinker.domain.shell.Shell
 import org.thinker.thinker.infrastructure.core.shell.builtin.DoNothing
 import org.thinker.thinker.infrastructure.core.shell.builtin.Notifier
 import org.thinker.thinker.infrastructure.core.shell.builtin.ToastProgram
+import org.thinker.thinker.infrastructure.utils.kextensions.logIfDebugging
 
 class AndroidShell(private val context: Context) : Shell
 {
@@ -24,7 +24,7 @@ class AndroidShell(private val context: Context) : Shell
         stderr: (String) -> Unit
     ): Int
     {
-        Log.d("AITask", input)
+        "interpreting the input: $input".logIfDebugging()
         if (input.isBlank()) return Shell.ExitCodes.SUCCESS
         val parsedInput = parseCommand(input)
 
