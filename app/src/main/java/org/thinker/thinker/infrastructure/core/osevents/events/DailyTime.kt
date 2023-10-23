@@ -34,7 +34,7 @@ class DailyTime(
     {
         EVENT_BUS.removeObserver(eventBusObserver)
         // TODO: cancel alarm
-        return Either.Right(false)
+        return Either.Right(true)
     }
 
     override fun notifyObserver(event: Event)
