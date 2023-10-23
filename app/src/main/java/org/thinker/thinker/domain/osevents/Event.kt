@@ -28,4 +28,15 @@ sealed class Event(keyName: String)
             }
         }
     }
+
+    sealed class Command(keyName: String) : Event(keyName)
+    {
+        class Voice : Command("VoiceCommand")
+        {
+            override fun equals(other: Any?): Boolean
+            {
+                return other is Voice
+            }
+        }
+    }
 }

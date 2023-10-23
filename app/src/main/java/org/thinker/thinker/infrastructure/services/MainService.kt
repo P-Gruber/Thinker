@@ -68,13 +68,13 @@ class MainService : Service()
             shell = AndroidShell(this),
             restrictionChecker = AndroidRestrictionChecker(this),
             localizedStrings = AndroidLocalizedStrings(this),
-            triggers = setOf(Event.Screen.TurnedOn()),
+            triggers = setOf(Event.Command.Voice()),
             dataSourceNames = setOf(),
             restrictionNames = setOf(),
-            actions = setOf("toast -t \"You're a good person!\""),
+            actions = setOf("assistant"),
         )
         addTask(aiTask)
-//        addTask(macroTask)
+        addTask(macroTask)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int

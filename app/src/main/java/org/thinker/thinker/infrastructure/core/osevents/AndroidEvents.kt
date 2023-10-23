@@ -9,6 +9,7 @@ import org.thinker.thinker.domain.utils.Either
 import org.thinker.thinker.infrastructure.core.AndroidTaskManager
 import org.thinker.thinker.infrastructure.core.osevents.events.DailyTime
 import org.thinker.thinker.infrastructure.core.osevents.events.ScreenEvent
+import org.thinker.thinker.infrastructure.core.osevents.events.VoiceCommand
 
 class AndroidEvents(private val context: Context, private val observer: AndroidTaskManager) :
     SystemEvents, SystemEventObserver
@@ -22,6 +23,7 @@ class AndroidEvents(private val context: Context, private val observer: AndroidT
             {
                 is Event.Screen -> ScreenEvent(context, this)
                 is Event.DateTime.DailyTime -> DailyTime(context, this, event.timeOfDay)
+                is Event.Command.Voice -> VoiceCommand(this)
             }
         }
         return systemEvent?.subscribeTo(event) ?: Either.Left(Exception())
