@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat
 import org.thinker.thinker.R
 import org.thinker.thinker.application.TaskManager
 import org.thinker.thinker.domain.AITask
+import org.thinker.thinker.domain.MacroTask
 import org.thinker.thinker.domain.Task
 import org.thinker.thinker.domain.dataretriever.DataSourceName
 import org.thinker.thinker.domain.osevents.Event
@@ -63,7 +64,17 @@ class MainService : Service()
             setOf(RestrictionName.BatteryLowerThan(20)),
             setOf("notifier", "do-nothing")
         )
+        val macroTask = MacroTask(
+            shell = AndroidShell(this),
+            restrictionChecker = AndroidRestrictionChecker(this),
+            localizedStrings = AndroidLocalizedStrings(this),
+            triggers = setOf(Event.Screen.TurnedOn()),
+            dataSourceNames = setOf(),
+            restrictionNames = setOf(),
+            actions = setOf("toast -t \"You're a good person!\""),
+        )
         addTask(aiTask)
+//        addTask(macroTask)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int

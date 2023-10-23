@@ -81,6 +81,7 @@ class DailyTime(
             )
             try
             {
+                // TODO FIX PROBLEM: If time is before current, it gets fired automatically
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, pendingIntent)
             } catch (e: SecurityException)
             {
